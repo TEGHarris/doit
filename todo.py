@@ -10,7 +10,7 @@ except FileExistsError:
 
 dir_path = home + "/.todo/"
 
-working_list = "main.txt"
+working_list = "main.json"
 open(dir_path + working_list, "a").close()
 
 @click.group()
@@ -22,16 +22,24 @@ def cli():
 
 def list():
     file = open(dir_path + working_list, "r")
-    for line in file:
-        click.echo(line)
+    tasks = json.load(file)
+    for task in tasks:
+        click.echo([task["name"]])
     file.close()
 
 @click.command()
-@click.argument("task")
-def add(task):
-    file = open(dir_path + working_list, "a")
-    file.write(task + "\n")
-    click.echo(f"{task} added successfully")
+@click.argument("new")
+def add(new):
+    with open(dir_path + working_list, "r") as file:
+        try:
+            tasks = json.load(file)
+        except json.decoder.JSONDecodeError:
+            tasks = []
+    working_task = {"name": new}
+    with open(dir_path + working_list, "w") as file:
+        tasks.append(working_task)
+        json.dump(tasks, file)
+    click.echo(f"{new} added successfully")
     file.close()
 
 
@@ -39,12 +47,18 @@ def add(task):
 @click.argument("target")
 def remove(target):
     with open(dir_path + working_list, "r") as file:
-        lines = file.readlines()
+        try:
+            tasks = json.load(file)
+        except json.decoder.JSONDecodeError:
+            tasks = []
 
     with open(dir_path + working_list, "w") as file:
-        lines = [line for line in lines if line.strip("\n") != target]
-        for line in lines:
-            file.write(line)
+        #.strip("\n")
+        new_tasks = []
+        for task in tasks:
+            if task["name"] != target:
+                new_tasks.append(task)
+        json.dump(new_tasks, file)
         click.echo(f"{target} removed successfully")
 
 cli.add_command(list)
