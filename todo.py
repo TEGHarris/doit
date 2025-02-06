@@ -1,3 +1,5 @@
+#Version: 1.0.0
+version = "1.0.0"
 import click, os, json
 home = os.path.expanduser("~")
 try:
@@ -12,11 +14,12 @@ working_list = "main.txt"
 open(dir_path + working_list, "a").close()
 
 @click.group()
+@click.version_option(version)
 def cli():
     pass
 
-
 @click.command()
+
 def list():
     file = open(dir_path + working_list, "r")
     for line in file:
@@ -35,12 +38,14 @@ def add(task):
 @click.command()
 @click.argument("target")
 def remove(target):
-    file = open(dir_path + working_list, "r+")
-    for line in file:
-        if line.strip("\n") == target:
-            file.remove(line)
-            click.echo(f"{target} removed successfully")
-            break
+    with open(dir_path + working_list, "r") as file:
+        lines = file.readlines()
+
+    with open(dir_path + working_list, "w") as file:
+        lines = [line for line in lines if line.strip("\n") != target]
+        for line in lines:
+            file.write(line)
+        click.echo(f"{target} removed successfully")
 
 cli.add_command(list)
 cli.add_command(add)
