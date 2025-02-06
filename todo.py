@@ -1,14 +1,15 @@
-import click
-import os
-
+import click, os, json
 home = os.path.expanduser("~")
 try:
     os.makedirs(home + "/.todo")
 except FileExistsError:
     pass
 
-main_file = open(home + "/.todo/main.txt", "a")
 
+dir_path = home + "/.todo/"
+
+working_list = "main.txt"
+open(dir_path + working_list, "a").close()
 
 @click.group()
 def cli():
@@ -17,22 +18,34 @@ def cli():
 
 @click.command()
 def list():
-    # click.echo("This is a list command")
-    main_file = open(home + "/.todo/main.txt", "r")
-    for line in main_file:
+    file = open(dir_path + working_list, "r")
+    for line in file:
         click.echo(line)
+    file.close()
 
 @click.command()
 @click.argument("task")
 def add(task):
-    # click.echo("This is an add command")
-    main_file = open(home + "/.todo/main.txt", "a")
-    main_file.write(task + "\n")
+    file = open(dir_path + working_list, "a")
+    file.write(task + "\n")
     click.echo(f"{task} added successfully")
+    file.close()
 
+
+@click.command()
+@click.argument("target")
+def remove(target):
+    file = open(dir_path + working_list, "r+")
+    for line in file:
+        if line.strip("\n") == target:
+            file.remove(line)
+            click.echo(f"{target} removed successfully")
+            break
 
 cli.add_command(list)
 cli.add_command(add)
+cli.add_command(remove)
+
 
 if __name__ == '__main__':
     cli()
