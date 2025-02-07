@@ -1,5 +1,5 @@
-#Version: 1.1.1
-version = "1.1.1"
+#Version: 1.2.0
+version = "1.2.0"
 import click, os, json
 home = os.path.expanduser("~")
 try:
@@ -61,9 +61,16 @@ def remove(target):
         json.dump(new_tasks, file)
         click.echo(f"{target} removed successfully")
 
+@click.command()
+def removeall():
+    with open(dir_path + working_list, "w") as file:
+        file.write("[]")
+        click.echo("All tasks removed successfully")
+
 cli.add_command(list)
 cli.add_command(add)
 cli.add_command(remove)
+cli.add_command(removeall)
 
 
 if __name__ == '__main__':
