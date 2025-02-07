@@ -1,5 +1,5 @@
-#Version: 1.1.0
-version = "1.1.0"
+#Version: 1.1.1
+version = "1.1.1"
 import click, os, json
 home = os.path.expanduser("~")
 try:
