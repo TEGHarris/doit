@@ -24,7 +24,7 @@ def list():
     file = open(dir_path + working_list, "r")
     tasks = json.load(file)
     for task in tasks:
-        click.echo([task["name"]])
+        click.echo(str(task["name"]))
     file.close()
 
 @click.command()
