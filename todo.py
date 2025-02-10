@@ -1,6 +1,7 @@
 #Version: 1.2.0
 version = "1.2.0"
-import click, os, json
+
+import click, os, json, lists
 home = os.path.expanduser("~")
 try:
     os.makedirs(home + "/.todo")
@@ -19,7 +20,6 @@ def cli():
     pass
 
 @click.command()
-
 def list():
     file = open(dir_path + working_list, "r")
     tasks = json.load(file)
@@ -71,7 +71,6 @@ cli.add_command(list)
 cli.add_command(add)
 cli.add_command(remove)
 cli.add_command(removeall)
-
 
 if __name__ == '__main__':
     cli()
