@@ -67,10 +67,38 @@ def removeall():
         file.write("[]")
         click.echo("All tasks removed successfully")
 
+# Commands from lists.py
+
+@click.command()
+def viewlists():
+    lists.viewlists()
+
+@click.command()
+@click.argument("new_list")
+def newlist(new_list):
+    lists.newlist(new_list)
+
+@click.command()
+@click.argument("list_name")
+def deletelist(list_name):
+    lists.deletelist(list_name)
+
+@click.command()
+@click.argument("list_name")
+def switch(list_name):
+    new_working = lists.switch(list_name)
+    global working_list
+    working_list = new_working
+
+
 cli.add_command(list)
 cli.add_command(add)
 cli.add_command(remove)
 cli.add_command(removeall)
+cli.add_command(viewlists)
+cli.add_command(newlist)
+cli.add_command(deletelist)
+cli.add_command(switch)
 
 if __name__ == '__main__':
     cli()
