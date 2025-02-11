@@ -2,7 +2,7 @@
 
 import os, json,click
 
-def viewlists():
+def viewlists(): # this currently shows config.json. This needs to be fixed
     home = os.path.expanduser("~")
     dir_path = home + "/.todo/"
     lists = os.listdir(dir_path)

@@ -1,5 +1,5 @@
-#Version: 1.2.0
-version = "1.2.0"
+#Version: 2.0.0
+version = "2.0.0"
 
 import click, os, json, lists
 home = os.path.expanduser("~")
@@ -8,10 +8,18 @@ try:
 except FileExistsError:
     pass
 
+try:
+    os.makedirs(home + "/.todo/config")
+except FileExistsError:
+    pass
+
+open(home + "/.todo/config/config.json", "a").close()
+
 
 dir_path = home + "/.todo/"
-
-working_list = "main.json"
+with open(dir_path + "config/config.json", "r") as file:
+    config = json.load(file)
+working_list = config["working_list"]
 open(dir_path + working_list, "a").close()
 
 @click.group()
@@ -21,8 +29,12 @@ def cli():
 
 @click.command()
 def list():
-    file = open(dir_path + working_list, "r")
-    tasks = json.load(file)
+    try:
+        file = open(dir_path + working_list, "r")
+        tasks = json.load(file)
+    except json.decoder.JSONDecodeError:
+        click.echo("No tasks in the list")
+        return
     for task in tasks:
         click.echo(str(task["name"]))
     file.close()
@@ -87,8 +99,10 @@ def deletelist(list_name):
 @click.argument("list_name")
 def switch(list_name):
     new_working = lists.switch(list_name)
-    global working_list
-    working_list = new_working
+    config = json.load(open(dir_path + "config/config.json", "r"))
+    config["working_list"] = new_working
+    with open(dir_path + "config/config.json", "w") as file:
+        json.dump(config, file)
 
 
 cli.add_command(list)
