@@ -2,12 +2,13 @@
 
 import os, json,click
 
-def viewlists(): # this currently shows config.json. This needs to be fixed
+def viewlists():
     home = os.path.expanduser("~")
     dir_path = home + "/.todo/"
     lists = os.listdir(dir_path)
     for list in lists:
-        click.echo(list.replace(".json",""))
+        if list.endswith(".json"):
+            click.echo(list.replace(".json",""))
 
 def newlist(name):
     home = os.path.expanduser("~")

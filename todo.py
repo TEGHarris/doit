@@ -1,6 +1,6 @@
 #Version: 2.0.0
 version = "2.0.0"
-
+# the config file needs to be made at start
 import click, os, json, lists
 home = os.path.expanduser("~")
 try:
@@ -35,8 +35,9 @@ def list():
     except json.decoder.JSONDecodeError:
         click.echo("No tasks in the list")
         return
+    click.echo(f"Tasks in {working_list[:-5]}:")
     for task in tasks:
-        click.echo(str(task["name"]))
+        click.echo(f"[ ] -- {str(task["name"])}")
     file.close()
 
 @click.command()
