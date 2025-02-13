@@ -18,7 +18,12 @@ open(home + "/.todo/config/config.json", "a").close()
 
 dir_path = home + "/.todo/"
 with open(dir_path + "config/config.json", "r") as file:
-    config = json.load(file)
+    try:
+        config = json.load(file)
+    except json.decoder.JSONDecodeError:
+        config = {"working_list": "main.json"}
+        with open(dir_path + "config/config.json", "w") as file:
+            json.dump(config, file)
 working_list = config["working_list"]
 open(dir_path + working_list, "a").close()
 
