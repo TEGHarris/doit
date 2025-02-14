@@ -1,6 +1,5 @@
 #Version: 2.0.1
 version = "2.0.1"
-# the config file needs to be made at start
 import click, os, json, lists
 home = os.path.expanduser("~")
 try:
