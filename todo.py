@@ -83,6 +83,9 @@ def remove(target):
 
 @click.command()
 def removeall():
+    if not click.confirm("Are you sure you want to remove all tasks?"):
+        click.echo("Operation cancelled")
+        return
     with open(dir_path + working_list, "w") as file:
         file.write("[]")
         click.echo("All tasks removed successfully")
