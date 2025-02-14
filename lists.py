@@ -19,8 +19,12 @@ def newlist(name):
 def deletelist(name):
     home = os.path.expanduser("~")
     dir_path = home + "/.todo/"
-    os.remove(dir_path + name + ".json")
-    click.echo(f"{name} deleted successfully")
+    if click.confirm(f"Are you sure you want to delete {name}?"):
+        os.remove(dir_path + name + ".json")
+        click.echo(f"{name} deleted successfully")
+        switch("main")
+    else:
+        click.echo("Operation cancelled")
 
 def switch(name):
     home = os.path.expanduser("~")

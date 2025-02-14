@@ -1,5 +1,5 @@
-#Version: 2.0.0
-version = "2.0.0"
+#Version: 2.0.1
+version = "2.0.1"
 # the config file needs to be made at start
 import click, os, json, lists
 home = os.path.expanduser("~")
@@ -64,6 +64,9 @@ def add(new):
 @click.command()
 @click.argument("target")
 def remove(target):
+    if not click.confirm(f"Are you sure you want to remove {target}?"):
+        click.echo("Operation cancelled")
+        return
     with open(dir_path + working_list, "r") as file:
         try:
             tasks = json.load(file)
@@ -110,6 +113,10 @@ def switch(list_name):
     with open(dir_path + "config/config.json", "w") as file:
         json.dump(config, file)
 
+@click.command()
+def where():
+    global working_list
+    click.echo(working_list)
 
 cli.add_command(list)
 cli.add_command(add)
@@ -119,6 +126,7 @@ cli.add_command(viewlists)
 cli.add_command(newlist)
 cli.add_command(deletelist)
 cli.add_command(switch)
+cli.add_command(where)
 
 if __name__ == '__main__':
     cli()
