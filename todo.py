@@ -1,6 +1,5 @@
-#Version: 2.0.0
-version = "2.0.0"
-
+#Version: 2.0.1
+version = "2.0.1"
 import click, os, json, lists
 home = os.path.expanduser("~")
 try:
@@ -18,7 +17,12 @@ open(home + "/.todo/config/config.json", "a").close()
 
 dir_path = home + "/.todo/"
 with open(dir_path + "config/config.json", "r") as file:
-    config = json.load(file)
+    try:
+        config = json.load(file)
+    except json.decoder.JSONDecodeError:
+        config = {"working_list": "main.json"}
+        with open(dir_path + "config/config.json", "w") as file:
+            json.dump(config, file)
 working_list = config["working_list"]
 open(dir_path + working_list, "a").close()
 
@@ -35,8 +39,9 @@ def list():
     except json.decoder.JSONDecodeError:
         click.echo("No tasks in the list")
         return
+    click.echo(f"Tasks in {working_list[:-5]}:")
     for task in tasks:
-        click.echo(str(task["name"]))
+        click.echo(f"[ ] -- {str(task["name"])}")
     file.close()
 
 @click.command()
@@ -58,6 +63,9 @@ def add(new):
 @click.command()
 @click.argument("target")
 def remove(target):
+    if not click.confirm(f"Are you sure you want to remove {target}?"):
+        click.echo("Operation cancelled")
+        return
     with open(dir_path + working_list, "r") as file:
         try:
             tasks = json.load(file)
@@ -75,6 +83,9 @@ def remove(target):
 
 @click.command()
 def removeall():
+    if not click.confirm("Are you sure you want to remove all tasks?"):
+        click.echo("Operation cancelled")
+        return
     with open(dir_path + working_list, "w") as file:
         file.write("[]")
         click.echo("All tasks removed successfully")
@@ -104,6 +115,10 @@ def switch(list_name):
     with open(dir_path + "config/config.json", "w") as file:
         json.dump(config, file)
 
+@click.command()
+def where():
+    global working_list
+    click.echo(working_list)
 
 cli.add_command(list)
 cli.add_command(add)
@@ -113,6 +128,7 @@ cli.add_command(viewlists)
 cli.add_command(newlist)
 cli.add_command(deletelist)
 cli.add_command(switch)
+cli.add_command(where)
 
 if __name__ == '__main__':
     cli()

@@ -6,5 +6,7 @@ Features
 - [x] List funcation
 - [x] Remove function
 - [x] Multiple lists
+- [ ] Add multiple todos for add command
 - [ ] Set due dates
 - [ ] Recurring tasks
+- [ ] Cloud Syncing
