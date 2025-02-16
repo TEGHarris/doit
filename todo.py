@@ -1,6 +1,6 @@
 #Version: 2.0.1
 version = "2.0.1"
-import click, os, json, lists
+import click, os, json, lists, dropboxSync
 home = os.path.expanduser("~")
 try:
     os.makedirs(home + "/.todo")
@@ -20,7 +20,10 @@ with open(dir_path + "config/config.json", "r") as file:
     try:
         config = json.load(file)
     except json.decoder.JSONDecodeError:
-        config = {"working_list": "main.json"}
+        config = {"working_list": "main.json",
+                  "AUTH_TOKEN": 'None',
+                  "APP_KEY": 'mr9d9s2pabmyq0s',
+                  "Dropbox_Enable": False}
         with open(dir_path + "config/config.json", "w") as file:
             json.dump(config, file)
 working_list = config["working_list"]
@@ -106,6 +109,7 @@ def newlist(new_list):
 def deletelist(list_name):
     lists.deletelist(list_name)
 
+
 @click.command()
 @click.argument("list_name")
 def switch(list_name):
@@ -120,6 +124,46 @@ def where():
     global working_list
     click.echo(working_list)
 
+# commands from dropboxSync.py
+@click.command()
+def enabledropbox():
+    with open (dir_path + "config/config.json", "r") as file:
+        config = json.load(file)
+        config["Dropbox_Enable"] = True
+    with open(dir_path + "config/config.json", "w") as file:
+        json.dump(config, file)
+    dropboxSync.get_auth_token()
+    click.echo("Dropbox enabled")
+
+@click.command()
+def whoami():
+    if not json.load(open(dir_path + "config/config.json"))["Dropbox_Enable"]:
+        click.echo("Dropbox not enabled")
+        return
+    dropboxSync.whoami()
+
+# @click.command()
+# def upload():
+#     if not json.load(open(dir_path + "config/config.json"))["Dropbox_Enable"]:
+#         click.echo("Dropbox not enabled")
+#         return
+#     dropboxSync.upload(dir_path, parent_folder="")
+
+# @click.command()
+# def download():
+#     if not json.load(open(dir_path + "config/config.json"))["Dropbox_Enable"]:
+#         click.echo("Dropbox not enabled")
+#         return
+#     dropboxSync.download(dir_path, folder_path="")
+
+@click.command()
+@click.argument("source")
+def sync(source):
+    if not json.load(open(dir_path + "config/config.json"))["Dropbox_Enable"]:
+        click.echo("Dropbox not enabled")
+        return
+    dropboxSync.syncDropbox(source,dir_path)
+
 cli.add_command(list)
 cli.add_command(add)
 cli.add_command(remove)
@@ -129,6 +173,12 @@ cli.add_command(newlist)
 cli.add_command(deletelist)
 cli.add_command(switch)
 cli.add_command(where)
+cli.add_command(enabledropbox)
+cli.add_command(whoami)
+# cli.add_command(upload)
+# cli.add_command(download)
+cli.add_command(sync)
+
 
 if __name__ == '__main__':
     cli()

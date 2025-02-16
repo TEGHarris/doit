@@ -1,22 +1,39 @@
-import dropbox, os, click, hashlib
-APP_KEY = 'SECRET'
-APP_SECRET = 'SECRET'
-flow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET)
-auth_url = flow.start()
-print("1. Go to: " + auth_url)
-print("2. Click 'Allow' (you might need to log in).")
-print("3. Copy the authorization code.")
-auth_code = input("Enter the authorization code here: ").strip()
-oauth_result = flow.finish(auth_code)
-ACCESS_TOKEN = oauth_result.access_token
-user_id = oauth_result.user_id
-dbx = dropbox.Dropbox(ACCESS_TOKEN)
-print("Linked account: ", dbx.users_get_current_account().email)
-
+import dropbox, os, click, hashlib, json
 home = os.path.expanduser("~")
 dir_path = home + "/.todo/"
 
+
+def get_auth_token():
+    if json.load(open(dir_path + "config/config.json"))["AUTH_TOKEN"] == "None":
+        APP_KEY = json.load(open(dir_path + "config/config.json"))["APP_KEY"]
+        flow = dropbox.DropboxOAuth2FlowNoRedirect(APP_KEY,use_pkce=True)
+        auth_url = flow.start()
+        print("1. Go to: " + auth_url)
+        print("2. Click 'Allow' (you might need to log in).")
+        print("3. Copy the authorization code.")
+        auth_code = input("Enter the authorization code here: ").strip()
+        oauth_result = flow.finish(auth_code)
+        ACCESS_TOKEN = oauth_result.access_token
+        user_id = oauth_result.user_id
+        with open(dir_path + "config/config.json", "r") as file:
+            config = json.load(file)
+            config["AUTH_TOKEN"] = ACCESS_TOKEN
+        with open(dir_path + "config/config.json", "w") as file:
+            json.dump(config, file)
+    else:
+        ACCESS_TOKEN = json.load(open(dir_path + "config/config.json"))["AUTH_TOKEN"]
+
+    return ACCESS_TOKEN
+
+def whoami():
+    ACCESS_TOKEN = get_auth_token()
+    dbx = dropbox.Dropbox(ACCESS_TOKEN)
+    account = dbx.users_get_current_account()
+    click.echo(f"Connected to {account.email}")
+
 def upload(path, parent_folder=""):
+    ACCESS_TOKEN = get_auth_token()
+    dbx = dropbox.Dropbox(ACCESS_TOKEN)    
     for file in os.listdir(path):
         full_path = os.path.join(path, file)
         if os.path.isdir(full_path):
@@ -24,23 +41,24 @@ def upload(path, parent_folder=""):
         else:
             with open(full_path, "rb") as f:
                 data = f.read()
-                dbx.files_upload(data, parent_folder + "/" + file)
+                try:
+                    dbx.files_upload(data, parent_folder + "/" + file)
+                except dropbox.exceptions.ApiError:
+                    dbx.files_upload(data, parent_folder + "/" + file, mode=dropbox.files.WriteMode.overwrite)
                 click.echo(f"{file} uploaded successfully")
 
 def download(dir_path, folder_path=""):
-    # List folder contents
+    ACCESS_TOKEN = get_auth_token()
+    dbx = dropbox.Dropbox(ACCESS_TOKEN)
     for entry in dbx.files_list_folder(folder_path).entries:
         if isinstance(entry, dropbox.files.FolderMetadata):
-            # Create local folder
             local_folder = os.path.join(dir_path, entry.name)
             os.makedirs(local_folder, exist_ok=True)
-            # Recursively download subfolder
             download(local_folder, entry.path_lower)
         elif isinstance(entry, dropbox.files.FileMetadata):
-            # Download file
             local_file = os.path.join(dir_path, entry.name)
             dbx.files_download_to_file(local_file, entry.path_lower)
-            print(f"{entry.name} downloaded successfully")
+            click.echo(f"{entry.name} downloaded successfully")
 
 def get_local_hash(filepath):
     """Generate a hash for a local file"""
@@ -57,6 +75,8 @@ def get_local_hash(filepath):
 
 
 def get_dropbox_hash(path):
+    ACCESS_TOKEN = get_auth_token()
+    dbx = dropbox.Dropbox(ACCESS_TOKEN)
     """Generate a hash for a dropbox file"""
     hasher = hashlib.sha1()
     for entry in dbx.files_list_folder(path).entries:
@@ -67,6 +87,16 @@ def get_dropbox_hash(path):
             hasher.update(response.content)
     return hasher.hexdigest()
 
+def syncDropbox(source, dir_path=dir_path):
+    if (get_dropbox_hash("") == get_local_hash(dir_path)):
+        click.echo("Files are already in sync")
+    else:
+        if source == "dropbox":
+            download(dir_path)
+        elif source == "local":
+            upload(dir_path)
+        else:
+            click.echo("Invalid source")
+            return
+        click.echo("Sync completed")
 
-print(f"local hash: {get_local_hash(dir_path)}")
-print(f"dropbox hash: {get_dropbox_hash('')}")
