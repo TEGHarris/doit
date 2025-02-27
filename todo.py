@@ -149,7 +149,7 @@ def disabledropbox():
     config["AUTH_TOKEN"] = "None"
 with open(dir_path + "config/config.json", "w") as file:
     json.dump(config, file)
-click.echo("Dropbox disabled")
+    click.echo("Dropbox disabled")
 
 def whoami():
     if not json.load(open(dir_path + "config/config.json"))["Dropbox_Enable"]:
