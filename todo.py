@@ -146,6 +146,7 @@ def disabledropbox():
             click.echo("Dropbox already disabled")
             return
     config["Dropbox_Enable"] = False
+    config["AUTH_TOKEN"] = "None"
 with open(dir_path + "config/config.json", "w") as file:
     json.dump(config, file)
 click.echo("Dropbox disabled")
@@ -175,6 +176,8 @@ def dropbox(command):
             dropboxSync.syncDropbox("dropbox")
         case "enable":
             enabledropbox()
+        case "disable":
+            disabledropbox()
         case _:
             click.echo("Invalid command")
             return
