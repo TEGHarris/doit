@@ -1,3 +1,4 @@
+# This is a library for syncing files with Dropbox:
 import dropbox, os, click, hashlib, json
 home = os.path.expanduser("~")
 dir_path = home + "/.todo/"
