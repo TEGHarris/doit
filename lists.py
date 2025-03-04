@@ -36,4 +36,3 @@ def switch(name):
         click.echo(f"{name} created successfully and switched to it")
         working_list = name + ".json"
     return working_list
-

@@ -23,6 +23,16 @@ def get_auth_token():
             json.dump(config, file)
     else:
         ACCESS_TOKEN = json.load(open(dir_path + "config/config.json"))["AUTH_TOKEN"]
+        try:
+            dbx = dropbox.Dropbox(ACCESS_TOKEN)
+            dbx.users_get_current_account()
+        except dropbox.exceptions.AuthError:
+            config = json.load(open(dir_path + "config/config.json"))
+            config["AUTH_TOKEN"] = "None"
+            with open(dir_path + "config/config.json", "w") as file:
+                json.dump(config, file)
+            print("Sorry, your access token is invalid or expired. This is entirely normal. Please reauthenticate.")
+            ACCESS_TOKEN = get_auth_token()
 
     return ACCESS_TOKEN
 
@@ -32,13 +42,22 @@ def whoami():
     account = dbx.users_get_current_account()
     click.echo(f"Connected to {account.email}")
 
-def upload(path, parent_folder=""):
+
+def upload(path,clear = False,parent_folder=""):
     ACCESS_TOKEN = get_auth_token()
-    dbx = dropbox.Dropbox(ACCESS_TOKEN)    
+    dbx = dropbox.Dropbox(ACCESS_TOKEN)
+    if clear:
+        try:
+            for file in dbx.files_list_folder(parent_folder).entries:
+                dbx.files_delete(file.path_lower)
+            print("Deleted existing files")
+        except dropbox.exceptions.ApiError:
+            print("No existing files to delete")
+            pass
     for file in os.listdir(path):
         full_path = os.path.join(path, file)
         if os.path.isdir(full_path):
-            upload(full_path, parent_folder + "/" + file)
+            upload(full_path,clear = False ,parent_folder= parent_folder + "/" + file)
         else:
             with open(full_path, "rb") as f:
                 data = f.read()
@@ -96,6 +115,8 @@ def syncDropbox(source, dir_path=dir_path):
             download(dir_path)
         elif source == "local":
             upload(dir_path)
+        elif source == "clear":
+            upload(dir_path, clear=True)
         else:
             click.echo("Invalid source")
             return

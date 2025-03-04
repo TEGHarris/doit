@@ -166,14 +166,18 @@ def sync(source):
 
 @click.command()
 @click.argument("command")
-def dropbox(command):
+@click.option("--clear", is_flag=True,default = False)
+def dropbox(command,clear):
     match command:
         case "whoami":
             whoami()
         case "upload":
-            dropboxSync.syncDropbox("local")
+            if clear:
+                sync("clear")
+            else:
+                sync("local")
         case "download":
-            dropboxSync.syncDropbox("dropbox")
+            sync("dropbox")
         case "enable":
             enabledropbox()
         case "disable":
