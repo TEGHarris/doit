@@ -90,7 +90,7 @@ def removeall():
         click.echo("Operation cancelled")
         return
     with open(dir_path + working_list, "w") as file:
-        file.write("[]")
+        file.write("")
         click.echo("All tasks removed successfully")
 
 # Commands from lists.py
