@@ -1,10 +1,10 @@
-# this is a library for adding multiple lists to the todo app
+# this is a library for adding multiple lists to the doit app
 
-import os, json,click,todo
+import os, json,click, doit
 
 def viewlists():
     home = os.path.expanduser("~")
-    dir_path = home + "/.todo/"
+    dir_path = home + "/.doit/"
     lists = os.listdir(dir_path)
     for list in lists:
         if list.endswith(".json"):
@@ -12,24 +12,24 @@ def viewlists():
 
 def newlist(name):
     home = os.path.expanduser("~")
-    dir_path = home + "/.todo/"
+    dir_path = home + "/.doit/"
     open(dir_path + name + ".json", "a").close()
     click.echo(f"{name} created successfully")
 
 def switch(name):
     home = os.path.expanduser("~")
-    if os.path.exists(home + "/.todo/" + name + ".json"):
+    if os.path.exists(home + "/.doit/" + name + ".json"):
         working_list = name + ".json"
         click.echo(f"Switched to {name}")
     else:
-        open(home + "/.todo/" + name + ".json", "a").close()
+        open(home + "/.doit/" + name + ".json", "a").close()
         click.echo(f"{name} created successfully and switched to it")
         working_list = name + ".json"
     return working_list
 
 def deletelist(name):
     home = os.path.expanduser("~")
-    dir_path = os.path.join(home, ".todo")
+    dir_path = os.path.join(home, ".doit")
     file_path = os.path.join(dir_path, name + ".json")
     if click.confirm(f"Are you sure you want to delete {name}?"):
         os.remove(file_path)

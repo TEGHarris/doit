@@ -3,19 +3,19 @@ version = "3.0.0"
 import click, os, json, lists, dropboxSync
 home = os.path.expanduser("~")
 try:
-    os.makedirs(home + "/.todo")
+    os.makedirs(home + "/.doit")
 except FileExistsError:
     pass
 
 try:
-    os.makedirs(home + "/.todo/config")
+    os.makedirs(home + "/.doit/config")
 except FileExistsError:
     pass
 
-open(home + "/.todo/config/config.json", "a").close()
+open(home + "/.doit/config/config.json", "a").close()
 
 
-dir_path = home + "/.todo/"
+dir_path = home + "/.doit/"
 with open(dir_path + "config/config.json", "r") as file:
     try:
         config = json.load(file)
