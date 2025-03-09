@@ -60,7 +60,6 @@ def add(new):
         tasks.append(working_task)
         json.dump(tasks, file)
     click.echo(f"{new} added successfully")
-    file.close()
 
 
 @click.command()
