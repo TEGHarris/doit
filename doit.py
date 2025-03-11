@@ -1,6 +1,7 @@
 #Version: 3.0.0
 version = "3.0.0"
 import click, os, json, lists, dropboxSync
+from thefuzz import fuzz
 home = os.path.expanduser("~")
 try:
     os.makedirs(home + "/.doit")
@@ -28,6 +29,19 @@ with open(dir_path + "config/config.json", "r") as file:
             json.dump(config, file)
 working_list = config["working_list"]
 open(dir_path + working_list, "a").close()
+
+def fuzzy(target,candidates):
+    best_match = 0
+    best_candidate = ""
+    for candidate in candidates:
+        match = fuzz.ratio(target,candidate)
+        if match > best_match:
+            best_match = match
+            best_candidate = candidate
+    if best_match > 70:
+        return best_candidate
+    else:
+        return False
 
 @click.group()
 @click.version_option(version)
@@ -76,13 +90,21 @@ def remove(target):
 
     with open(dir_path + working_list, "w") as file:
         #.strip("\n")
+        targetfound = False
         new_tasks = []
         for task in tasks:
             if task["name"] != target:
                 new_tasks.append(task)
+            if task["name"] == target:
+                targetfound = True
         json.dump(new_tasks, file)
+        if not targetfound:
+            click.echo(f"{target} not found")
+            task_names = [task["name"] for task in tasks]
+            if fuzzy(target,task_names) != False:
+                click.echo(f"Did you mean {fuzzy(target,task_names)}?")
+            return
         click.echo(f"{target} removed successfully")
-
 @click.command()
 def removeall():
     if not click.confirm("Are you sure you want to remove all tasks?"):
@@ -161,7 +183,6 @@ def sync(source):
         return
     dropboxSync.syncDropbox(source,dir_path)
 
-#This is a test function to replace all the other dropbox functions
 
 @click.command()
 @click.argument("command")

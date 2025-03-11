@@ -32,6 +32,11 @@ def deletelist(name):
     dir_path = os.path.join(home, ".doit")
     file_path = os.path.join(dir_path, name + ".json")
     if click.confirm(f"Are you sure you want to delete {name}?"):
+        if not os.path.exists(file_path):
+            click.echo(f"{name} does not exist")
+            if doit.fuzzy(name+".json",os.listdir(dir_path)) != False:
+                click.echo(f"Did you mean {(doit.fuzzy(name+".json",os.listdir(dir_path))).removesuffix(".json")}?")
+            return
         os.remove(file_path)
         click.echo(f"{name} deleted successfully")
         click.echo("Switching to main list")
