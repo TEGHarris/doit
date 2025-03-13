@@ -34,6 +34,7 @@ def deletelist(name):
     if click.confirm(f"Are you sure you want to delete {name}?"):
         if not os.path.exists(file_path):
             click.echo(f"{name} does not exist")
+            filenames = os.listdir(dir_path).strip(".json")
             if doit.fuzzy(name+".json",os.listdir(dir_path)) != False:
                 click.echo(f"Did you mean {(doit.fuzzy(name+".json",os.listdir(dir_path))).removesuffix(".json")}?")
             return

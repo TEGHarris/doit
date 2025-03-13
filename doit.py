@@ -38,7 +38,7 @@ def fuzzy(target,candidates):
         if match > best_match:
             best_match = match
             best_candidate = candidate
-    if best_match > 70:
+    if best_match > 60:
         return best_candidate
     else:
         return False
