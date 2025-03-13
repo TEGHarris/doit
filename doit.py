@@ -1,5 +1,5 @@
-#Version: 3.0.0
-version = "3.0.0"
+#Version: 3.1.0
+version = "3.1.0"
 import click, os, json, lists, dropboxSync
 from thefuzz import fuzz
 home = os.path.expanduser("~")
@@ -206,7 +206,24 @@ def dropbox(command,clear):
             click.echo("Invalid command")
             return
 
-
+@click.command()
+@click.argument("option")
+def debug(option):
+    match option:
+        case "reset":
+            os.remove(dir_path + "config/config.json")
+            click.echo("Config reset successfully")
+        case "view":
+            config = json.load(open(dir_path + "config/config.json"))
+            for i in config:
+                click.echo(f"{i}: {config[i]}")
+        case "nuke":
+            click.confirm("Are you sure you want to delete all lists and config? This action cannot be undone")
+            for file in os.listdir(dir_path):
+                if not os.path.isdir(dir_path + file):
+                    os.remove(dir_path + file)
+            os.remove(dir_path + "config/config.json")
+            click.echo("All lists and config deleted successfully")
 
 cli.add_command(list)
 cli.add_command(add)
@@ -218,7 +235,7 @@ cli.add_command(deletelist)
 cli.add_command(switch)
 cli.add_command(where)
 cli.add_command(dropbox)
-
+cli.add_command(debug)
 
 if __name__ == '__main__':
     cli()
