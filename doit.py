@@ -76,19 +76,15 @@ def add(new):
     click.echo(f"{new} added successfully")
 
 
-@click.command()
-@click.argument("target")
-def remove(target):
-    if not click.confirm(f"Are you sure you want to remove {target}?"):
-        click.echo("Operation cancelled")
-        return
+def remove_task(target):
+
     with open(dir_path + working_list, "r") as file:
         try:
             tasks = json.load(file)
         except json.decoder.JSONDecodeError:
             tasks = []
 
-    with open(dir_path + working_list, "w") as file:
+    with open(dir_path + working_list, "w+") as file:
         #.strip("\n")
         targetfound = False
         new_tasks = []
@@ -102,9 +98,25 @@ def remove(target):
             click.echo(f"{target} not found")
             task_names = [task["name"] for task in tasks]
             if fuzzy(target,task_names) != False:
-                click.echo(f"Did you mean {fuzzy(target,task_names)}?")
-            return
-        click.echo(f"{target} removed successfully")
+                if click.confirm(f"Did you mean {fuzzy(target,task_names)}?"):
+                    new_target = fuzzy(target,task_names)
+                    try:
+                        tasks = json.load(file)
+                    except json.decoder.JSONDecodeError:
+                        tasks = []
+                    remove_task(new_target)
+                    # return
+        else:
+            click.echo(f"{target} removed successfully")
+
+@click.command()
+@click.argument("target")
+def remove(target):
+    if not click.confirm(f"Are you sure you want to remove {target}?"):
+        click.echo("Operation cancelled")
+        return
+    remove_task(target)
+
 @click.command()
 def removeall():
     if not click.confirm("Are you sure you want to remove all tasks?"):
