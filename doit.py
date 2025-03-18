@@ -72,6 +72,7 @@ def add(new):
     working_task = {"name": new}
     with open(dir_path + working_list, "w") as file:
         tasks.append(working_task)
+        tasks.sort(key=lambda x: x["name"])
         json.dump(tasks, file)
     click.echo(f"{new} added successfully")
 
