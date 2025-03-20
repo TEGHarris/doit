@@ -1,5 +1,5 @@
-#Version: 3.1.0
-version = "3.1.0"
+#Version: 3.2.0
+version = "3.2.0"
 import click, os, json, lists, dropboxSync
 from thefuzz import fuzz
 home = os.path.expanduser("~")
@@ -20,7 +20,7 @@ dir_path = home + "/.doit/"
 with open(dir_path + "config/config.json", "r") as file:
     try:
         config = json.load(file)
-    except json.    decoder.JSONDecodeError:
+    except json.decoder.JSONDecodeError:
         config = {"working_list": "main.json",
                   "AUTH_TOKEN": 'None',
                   "APP_KEY": 'mr9d9s2pabmyq0s',
