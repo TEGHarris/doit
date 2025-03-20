@@ -1,6 +1,6 @@
 #Version: 3.2.0
 version = "3.2.0"
-import click, os, json, lists, dropboxSync
+import click, os, json, lists, dropboxSync, datetime
 from thefuzz import fuzz
 home = os.path.expanduser("~")
 try:
@@ -56,23 +56,33 @@ def list():
     except json.decoder.JSONDecodeError:
         click.echo("No tasks in the list")
         return
-    click.echo(f"Tasks in {working_list[:-5]}:")
+    click.echo(f"Tasks in {working_list[:-5]}:") # the -5 is to remove the .json extension
     for task in tasks:
-        click.echo(f"[ ] -- {str(task["name"])}")
+        click.echo(f"[ ] -- {str(task["name"])} -- {str(task['due'])}")
     file.close()
 
 @click.command()
 @click.argument("new")
-def add(new):
+@click.option("-d", "--due", default=None)
+def add(new,due):
     with open(dir_path + working_list, "r") as file:
         try:
             tasks = json.load(file)
         except json.decoder.JSONDecodeError:
             tasks = []
-    working_task = {"name": new}
+    if due != None:
+        try:
+            datetime.datetime.strptime(due, '%Y/%m/%d')
+        except ValueError:
+            click.echo("Invalid date format. Please use YYYY/MM/DD")
+    working_task = {"name": new, "due": due}
+    for i in tasks:
+        if i["name"] == new:
+            click.echo(f"{new} already exists")
+            return
     with open(dir_path + working_list, "w") as file:
         tasks.append(working_task)
-        tasks.sort(key=lambda x: x["name"])
+        tasks.sort(key=lambda x: x["name"]) # at some point, i should update this to sort by due date
         json.dump(tasks, file)
     click.echo(f"{new} added successfully")
 
